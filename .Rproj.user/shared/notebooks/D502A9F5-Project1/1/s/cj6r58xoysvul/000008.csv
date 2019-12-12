@@ -1,0 +1,4 @@
+"0",""
+"0","library(ggplot2)"
+"0","#Relationship between accounts of Murder, Robbery, and Rape In New York "
+"0","ggplot() + geom_point(data = combined, aes(x = Robbery, y = Murder.x, color =Rape.x))+ geom_line()+ ggtitle(""Rate of Rape while comparing Rate of Robbery and Rate Of Murder in New York "")+ ylab(""Accounts of Murder"")+ xlab(""Accounts of Robbery"")"

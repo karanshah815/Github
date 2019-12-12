@@ -1,0 +1,3 @@
+"0",""
+"0","#Number of Robberies in New York by the Years"
+"0","ggplot(combined, aes(x= Year.x, y= Robbery, fill= Year.x))+ geom_bar(stat=""summary"", fun.y=""mean"") + geom_errorbar(stat=""summary"") + ggtitle(""Robbery Rates in New York by Year"") + theme(legend.position= ""none"") + xlab(""Year"") + ylab(""Rate of Robbery"")"

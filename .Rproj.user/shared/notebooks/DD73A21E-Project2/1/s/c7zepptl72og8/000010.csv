@@ -1,0 +1,5 @@
+"0","library(plotROC)"
+"0","ROCplot<-ggplot(MedGPA)+geom_roc(aes(d=Acceptance,m=prob), n.cuts=0) "
+"0","calc_auc(ROCplot)"
+"2","Error in loadNamespace(name) : there is no package called ‘plyr’
+"

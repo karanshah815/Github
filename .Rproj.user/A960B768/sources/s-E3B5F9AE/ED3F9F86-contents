@@ -1,0 +1,15 @@
+#run to install the blogdown package; wait until finished
+install.packages("glmnet")
+install.packages("ggplot2")
+install.packages("blogdown")
+install.packages("tidyr")
+blogdown::install_hugo()
+blogdown::new_site(theme="nurlansu/hugo-sustain")
+tinytex::install_tinytex()
+blogdown::serve_site()
+install.packages("shiny")
+install.packages("coeftest")
+install.packages("minyUI")
+r = getOption("repos")
+r["CRAN"] = "http://cran.us.r-project.org"
+options(repos = r)

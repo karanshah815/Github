@@ -1,0 +1,2 @@
+"0","ggplot()+geom_point(aes(comb_pca$scores[,1], comb_pca$scores[,2]))+xlab(""PC1"") + ylab(""PC2"")+ xlim(c(-250,10))"
+"0",""

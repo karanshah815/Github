@@ -1,0 +1,234 @@
+---
+title: "Project 2"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+**Karan Shah**
+**kjs3349**
+
+**The MedGPA dataset contains variables that are important predictors of getting accepted into medical school. This dataset lists the statistics of students who recieved admission into Medical school and those who got denied from Medical School. The dataset contains the following variables: Acceptance to Medical Schoo as a binomial variable, Sex, BCPM, GPA, VR, PS, WS, BS, MCAT Scores, and the number of applications the specific student submitted.***
+
+##1. MANOVA 
+```{r}
+library(dplyr)
+MedGPA<- read.csv("MedGPA.csv")
+manova1<- manova(cbind(BCPM, GPA,MCAT)~Acceptance, data = MedGPA)
+summary(manova1)
+summary.aov(manova1)
+MedGPA%>%group_by(Acceptance)%>%summarize(mean(BCPM),mean(GPA),mean(MCAT))
+1-(0.95^4)
+.05/4
+```
+**The result of the MANOVA was significant with a p-value of 0.0002265. This means that there are variables that have a mean difference across levels in the Acceptance variable. From the Anova tests we can see that all three of the Variables have a significant dffirence in means when comparing Accepted statistics to not accepted statistics. A total of 4 tests were performed. The probability of a Type 1 error is 18.55 percent. The value of Bonferroni's correction is 0.0125. The indeependent sample, random observation, no extreme outlier, no multicolineraity, and multivariant normality assumptions were met**
+
+
+
+
+##2. Randomization Test 
+
+```{r}
+library(ggplot2)
+t.test(data=MedGPA,MCAT~Acceptance)
+t.test(data=MedGPA, GPA~Acceptance)
+t<-vector()
+for(i in 1:10000){
+samp<-rnorm(25,mean=5)
+t[i] <- (mean(samp)-5)/(sd(samp)/sqrt(25))
+}
+data.frame(t)%>%
+ggplot(aes(t))+geom_histogram(aes(y=..density..), bins=30)+
+stat_function(fun=dt,args=list(df=24),geom="line")
+```
+**My goal was to test whether the means of GPA and MCAT scores were significantly different in student that were accepted to medical school and students that were not accepted. The null hypothesis for both of the tests is that there is no significant difference in the means between GPA and MCAT scores between students that are admitted to medical school and students that are not admitted to medical school. The alternative hypothesis iss that there is a significant difference between the means of MCAT and GPA scores between student who are accepted to medical school and students who are not accepted to medical school. My first t-test looked at the interaction of MCAT scores between students who were accepted into medical school and students who were not. A p-value of 0.002115 was recorded meaining that there is a significant difference in MCAT scores. The second t-test tested GPA and Acceptance and had a significant p-value of 3.28*10^-5 meaning that this interaction was significant as well.   **
+
+
+##3. Linear Regression Model 
+```{r}
+library(sandwich)
+library(lmtest)
+MedGPA$MCAT_c<- MedGPA$MCAT-mean(MedGPA$MCAT)
+MedGPA$GPA_c<- MedGPA$GPA-mean(MedGPA$GPA)
+fit<-lm(MCAT_c~GPA_c*Sex, data = MedGPA)
+summary(fit)
+ggplot(MedGPA, aes(x=GPA, y=MCAT,group=Sex))+geom_point(aes(color=Sex))+geom_smooth(method="lm",formula=y~1,se=F,fullrange=T,aes(color=Sex))+theme(legend.position=c(.9,.19))+xlab("GPA")
+
+
+
+
+
+
+##Linearity, homoskedasticity
+resids<-fit$residuals
+fitvals<-fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color='red')
+
+##Normality 
+ggplot()+geom_histogram(aes(resids), bins=20)
+
+##Robust SE
+coeftest(fit, vcov=vcovHC(fit))[,1:2]
+
+##Variation Explained by model
+summary(fit)$r.sq
+
+```
+**The intercept explains the MCAT value when the value of GPA and sex is 0. Because sex can not be theoretically 0, this information is not significant. GPA_c explains that if you hold sex constant, every 1 point increase in GPA would increase the MCAT score by 8.6614. SEXM explains that if you hold GPA constant, being a male will increase you MCAT score by 0.4210 compared to females. The interaction explains that if the effect of Sex on MCAT differs by GPA. All assumptions are met because the graphs for linearity, normality, homoskedasticity all loo normal. When the regression was recomuped with standard error using the coeftest fucntion, the standard erros increased when comared to the standard error in the regression run previously. The proportion of the variation explained by the model is 0.2956.  **
+
+#4. Regression with bootstrapped standard errors
+```{r}
+fit<-lm(MCAT_c~ GPA_c * Sex, data=MedGPA) 
+summary(fit)
+#boostrap residuals 
+ resids<-fit$residuals #save residuals
+ fitted<-fit$fitted.values #save yhats
+ resid_resamp<-replicate(5000,{
+ new_resids<-sample(resids,replace=TRUE) #resample resids w/ replacement
+ MedGPA$new_y<-fitted+new_resids #add new resids to yhats to get new "data"
+ fit1<-lm(new_y~GPA_c+Sex,data=MedGPA) #refit model
+ coef(fit1) #save coefficient estimates (b0, b1, etc)
+})
+ resid_resamp%>%t%>%as.data.frame%>%summarize_all(sd)
+
+
+
+```
+**Using boot strapped standard errors I was able to find that the p-values did not change. When looking at the standard errors when using boot strapped errors, i found that the standard error was less for both GPA and Sex than tha robust standard error and the original standard error.    **
+
+
+##5. Logistical regression with binary variable 
+```{r}
+library(dplyr)
+library(ggplot2)
+class_diag<-function(probs,truth){
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+
+
+
+odds<-function(p)p/(1-p)
+p<-seq(0,1,by=.1)
+
+
+
+fit2<- glm(Acceptance~MCAT + GPA + BCPM, data = MedGPA, family = binomial(link = "logit"))
+
+exp(coef(fit2))
+prob<- predict(fit2, type = "response")
+class_diag(prob, MedGPA$Acceptance)
+table(predict = as.numeric(prob>0.5), truth = MedGPA$Acceptance)%>%addmargins
+
+##Sensitivity 
+23/30
+##Specificity
+18/25
+##Precision PPV
+23/30
+##Accuracy
+(18+53)/55
+
+##Density Plot 
+logit<-function(p)log(odds(p))
+cbind(p, odds=odds(p),logit=logit(p))%>%round(4)
+
+MedGPA$logit<-predict(fit2) #get predicted log-odds
+MedGPA$outcome<-factor(MedGPA$Acceptance,levels=c("Accepted","Denied"))
+ggplot(MedGPA,aes(logit, fill=as.factor(Acceptance)))+geom_density(alpha=.3)+
+  geom_vline(xintercept=0,lty=2)
+
+
+##ROC Curve
+sens<- function(p, data = MedGPA, y = Acceptance) mean(MedGPA[MedGPA$Acceptance==1,]$prob>p) 
+
+spec<- function(p,data=MedGPA, y=Acceptance) mean(MedGPA[MedGPA$Acceptance==0,]$prob<p)
+
+sensitivity<- sapply(seq(0,1,.01), sens, MedGPA)
+specificity<- sapply(seq(0,1,.01), spec, MedGPA)
+ROC1<- data.frame(sensitivity, specificity, cutoff = seq(0,1,.01))
+ROC1$TPR<- sensitivity
+ROC1$FPR<- 1- specificity
+ROC1%>%ggplot(aes(FPR, TPR))+geom_path(size = 1.5) + geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1), lty = 2) + scale_x_continuous(limits = c(0,1))
+library(plotROC)
+ROCplot<-ggplot(MedGPA)+geom_roc(aes(d=Acceptance,m=prob), n.cuts=0) 
+
+##10 fold 
+set.seed(1234) 
+k = 5
+data1 <- MedGPA[sample(nrow(MedGPA)), ]
+folds <- cut(seq(1:nrow(MedGPA)), breaks = k, labels = F) 
+diags <- NULL
+for (i in 1:k) {
+ train <- data1[folds != i, ]
+ test <- data1[folds == i, ]
+ truth <- test$Acceptance
+ fit4 <- lm(Acceptance~ MCAT+ GPA+ BCPM, data = train, family = "binomial") 
+ probs <- predict(fit4, newdata = test, type = "response") 
+ preds <- ifelse(probs > 0.5, 1, 0)
+ diags <- rbind(diags, class_diag(probs, truth)) 
+}
+diags %>% summarize_all(mean)
+summary(fit4)
+```
+**The coeeficient estimates show the effect of the differennt variables on the odds for Admission. For every one point increase in MCAT scores the odds of admission increases by 1.1776. For every one point increase in GPA, the odds of admission increases by 1.6168e^2. And finally for every one point increase in the BCPM, the odds of admission increases by 6.995e^-1. The accuracy from the model is calculated as 0.7454. Sensitivity is the true positive rate (TPR). It is the probability of correctly predicting acceptance for accepted students. I calculated sensitivity from the model as 0.7666. The Specifity is the true negative rate (TNR). I calculated the specificity from the model as 0.72 (18/25). The Precision (PPV) of the model is the proportion of the statistics that are predicted as accepted to those who actually are. It is 0.76. The auc calculated for the ROC curve was 0.8373. After performing a 5 fold CV i was able to find that the Sensitivity was alloted to 0.765 while the accuracy is at 0.672 and the recall is 0.6561905.**
+
+
+
+##6. Lasso Regression 
+```{r}
+library(glmnet)
+
+y<- as.matrix(MedGPA$MCAT)
+##Predicting GPA 
+x<-MedGPA%>%dplyr::select(GPA, BCPM,Apps, VR, PS)%>%mutate_all(scale)%>%as.matrix    
+                          
+cv<-cv.glmnet(x,y)
+lasso1<- glmnet(x,y,lambda = cv$lambda.1se)
+coef(lasso1)
+
+
+
+set.seed(1234)
+k=5 #choose number of folds
+data1<-MedGPA[sample(nrow(MedGPA)),] #randomly order rows
+folds<-cut(seq(1:nrow(MedGPA)),breaks=k,labels=F) #create folds
+diags<-NULL
+for(i in 1:k){
+  train<-data1[folds!=i,]
+  test<-data1[folds==i,]
+  fit6<-lm(MCAT~GPA+VR+PS,data=train)
+  yhat<-predict(fit,newdata=test)
+  diags<-mean((test$MCAT-yhat)^2)
+}
+mean(diags)
+summary(fit6)
+```
+**I ran a lasso regression trying to predict MCAT scores from GPA, BCMP, Apps, VR, and PS variables. By running the lasso regression i was able to see that GPA, VR, and PS were retained meaning that they were the most important predictors of an MCAT score. The residual standard error of 2.233 is more than the standard from the 5 fold CV conducted in part 5 which has a value of 0.3915**

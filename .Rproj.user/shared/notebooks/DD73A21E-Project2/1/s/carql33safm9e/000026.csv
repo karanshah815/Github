@@ -1,0 +1,29 @@
+"0","library(plotROC)"
+"0","ROCplot<-ggplot(MedGPA)+geom_roc(aes(d=Acceptance,m=prob), n.cuts=0) "
+"0",""
+"0","##10 fold "
+"0","set.seed(1234) "
+"0","k = 5"
+"0","data1 <- MedGPA[sample(nrow(MedGPA)), ]"
+"0","folds <- cut(seq(1:nrow(MedGPA)), breaks = k, labels = F) "
+"0","diags <- NULL"
+"0","for (i in 1:k) {"
+"0"," train <- data1[folds != i, ]"
+"0"," test <- data1[folds == i, ]"
+"0"," truth <- test$Acceptance"
+"0"," fit4 <- lm(Acceptance~ MCAT+ GPA+ BCPM, data = train, family = ""binomial"") "
+"0"," probs <- predict(fit4, newdata = test, type = ""response"") "
+"0"," preds <- ifelse(probs > 0.5, 1, 0)"
+"0"," diags <- rbind(diags, class_diag(probs, truth)) "
+"0","}"
+"2","In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+ extra argument ‘family’ will be disregarded"
+"2","In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+ extra argument ‘family’ will be disregarded"
+"2","In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+ extra argument ‘family’ will be disregarded"
+"2","In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+ extra argument ‘family’ will be disregarded"
+"2","In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+ extra argument ‘family’ will be disregarded"
+"0","diags %>% summarize_all(mean)"

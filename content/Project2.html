@@ -1,0 +1,396 @@
+---
+title: "Project 2"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+
+<p><strong>Karan Shah</strong>
+<strong>kjs3349</strong></p>
+<p><strong>The MedGPA dataset contains variables that are important predictors of getting accepted into medical school. This dataset lists the statistics of students who recieved admission into Medical school and those who got denied from Medical School. The dataset contains the following variables: Acceptance to Medical Schoo as a binomial variable, Sex, BCPM, GPA, VR, PS, WS, BS, MCAT Scores, and the number of applications the specific student submitted.</strong>*</p>
+<p>##1. MANOVA</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>MedGPA&lt;- read.csv(&quot;MedGPA.csv&quot;)
+manova1&lt;- manova(cbind(BCPM, GPA,MCAT)~Acceptance, data = MedGPA)
+summary(manova1)</code></pre>
+<pre><code>##            Df  Pillai approx F num Df den Df    Pr(&gt;F)    
+## Acceptance  1 0.31392   7.7783      3     51 0.0002265 ***
+## Residuals  53                                             
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>summary.aov(manova1)</code></pre>
+<pre><code>##  Response BCPM :
+##             Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Acceptance   1 1.6922 1.69216  18.219 8.179e-05 ***
+## Residuals   53 4.9225 0.09288                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response GPA :
+##             Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Acceptance   1 1.2947 1.29472  21.879 2.043e-05 ***
+## Residuals   53 3.1363 0.05918                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response MCAT :
+##             Df Sum Sq Mean Sq F value   Pr(&gt;F)   
+## Acceptance   1  212.4 212.402  10.819 0.001789 **
+## Residuals   53 1040.5  19.632                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>MedGPA%&gt;%group_by(Acceptance)%&gt;%summarize(mean(BCPM),mean(GPA),mean(MCAT))</code></pre>
+<pre><code>## # A tibble: 2 x 4
+##   Acceptance `mean(BCPM)` `mean(GPA)` `mean(MCAT)`
+##        &lt;int&gt;        &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;
+## 1          0         3.31        3.39         34.1
+## 2          1         3.66        3.69         38.1</code></pre>
+<pre class="r"><code>1-(0.95^4)</code></pre>
+<pre><code>## [1] 0.1854938</code></pre>
+<pre class="r"><code>.05/4</code></pre>
+<pre><code>## [1] 0.0125</code></pre>
+<p><strong>The result of the MANOVA was significant with a p-value of 0.0002265. This means that there are variables that have a mean difference across levels in the Acceptance variable. From the Anova tests we can see that all three of the Variables have a significant dffirence in means when comparing Accepted statistics to not accepted statistics. A total of 4 tests were performed. The probability of a Type 1 error is 18.55 percent. The value of Bonferroni’s correction is 0.0125. The indeependent sample, random observation, no extreme outlier, no multicolineraity, and multivariant normality assumptions were met</strong></p>
+<p>##2. Randomization Test</p>
+<pre class="r"><code>library(ggplot2)
+t.test(data=MedGPA,MCAT~Acceptance)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  MCAT by Acceptance
+## t = -3.2489, df = 48.16, p-value = 0.002115
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -6.388883 -1.504450
+## sample estimates:
+## mean in group 0 mean in group 1 
+##        34.12000        38.06667</code></pre>
+<pre class="r"><code>t.test(data=MedGPA, GPA~Acceptance)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  GPA by Acceptance
+## t = -4.601, df = 46.898, p-value = 3.208e-05
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -0.4428704 -0.1733962
+## sample estimates:
+## mean in group 0 mean in group 1 
+##        3.385200        3.693333</code></pre>
+<pre class="r"><code>t&lt;-vector()
+for(i in 1:10000){
+samp&lt;-rnorm(25,mean=5)
+t[i] &lt;- (mean(samp)-5)/(sd(samp)/sqrt(25))
+}
+data.frame(t)%&gt;%
+ggplot(aes(t))+geom_histogram(aes(y=..density..), bins=30)+
+stat_function(fun=dt,args=list(df=24),geom=&quot;line&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+**My goal was to test whether the means of GPA and MCAT scores were significantly different in student that were accepted to medical school and students that were not accepted. The null hypothesis for both of the tests is that there is no significant difference in the means between GPA and MCAT scores between students that are admitted to medical school and students that are not admitted to medical school. The alternative hypothesis iss that there is a significant difference between the means of MCAT and GPA scores between student who are accepted to medical school and students who are not accepted to medical school. My first t-test looked at the interaction of MCAT scores between students who were accepted into medical school and students who were not. A p-value of 0.002115 was recorded meaining that there is a significant difference in MCAT scores. The second t-test tested GPA and Acceptance and had a significant p-value of 3.28*10^-5 meaning that this interaction was significant as well. **</p>
+<p>##3. Linear Regression Model</p>
+<pre class="r"><code>library(sandwich)
+library(lmtest)</code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
+<pre><code>## 
+## Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     as.Date, as.Date.numeric</code></pre>
+<pre class="r"><code>MedGPA$MCAT_c&lt;- MedGPA$MCAT-mean(MedGPA$MCAT)
+MedGPA$GPA_c&lt;- MedGPA$GPA-mean(MedGPA$GPA)
+fit&lt;-lm(MCAT_c~GPA_c*Sex, data = MedGPA)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = MCAT_c ~ GPA_c * Sex, data = MedGPA)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -11.3726  -2.5536  -0.2759   2.6843   8.3184 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)  -0.1969     0.7902  -0.249   0.8043  
+## GPA_c         8.6614     3.2968   2.627   0.0113 *
+## SexM          0.4210     1.1266   0.374   0.7102  
+## GPA_c:SexM    0.7964     4.1276   0.193   0.8478  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 4.16 on 51 degrees of freedom
+## Multiple R-squared:  0.2956, Adjusted R-squared:  0.2542 
+## F-statistic: 7.135 on 3 and 51 DF,  p-value: 0.0004313</code></pre>
+<pre class="r"><code>ggplot(MedGPA, aes(x=GPA, y=MCAT,group=Sex))+geom_point(aes(color=Sex))+geom_smooth(method=&quot;lm&quot;,formula=y~1,se=F,fullrange=T,aes(color=Sex))+theme(legend.position=c(.9,.19))+xlab(&quot;GPA&quot;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>##Linearity, homoskedasticity
+resids&lt;-fit$residuals
+fitvals&lt;-fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color=&#39;red&#39;)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>##Normality 
+ggplot()+geom_histogram(aes(resids), bins=20)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-3-3.png" width="672" /></p>
+<pre class="r"><code>##Robust SE
+coeftest(fit, vcov=vcovHC(fit))[,1:2]</code></pre>
+<pre><code>##               Estimate Std. Error
+## (Intercept) -0.1968546  0.6963431
+## GPA_c        8.6613802  3.4307329
+## SexM         0.4210097  1.1600489
+## GPA_c:SexM   0.7964129  5.7184843</code></pre>
+<pre class="r"><code>##Variation Explained by model
+summary(fit)$r.sq</code></pre>
+<pre><code>## [1] 0.2956267</code></pre>
+<p><strong>The intercept explains the MCAT value when the value of GPA and sex is 0. Because sex can not be theoretically 0, this information is not significant. GPA_c explains that if you hold sex constant, every 1 point increase in GPA would increase the MCAT score by 8.6614. SEXM explains that if you hold GPA constant, being a male will increase you MCAT score by 0.4210 compared to females. The interaction explains that if the effect of Sex on MCAT differs by GPA. All assumptions are met because the graphs for linearity, normality, homoskedasticity all loo normal. When the regression was recomuped with standard error using the coeftest fucntion, the standard erros increased when comared to the standard error in the regression run previously. The proportion of the variation explained by the model is 0.2956. </strong></p>
+<p>#4. Regression with bootstrapped standard errors</p>
+<pre class="r"><code>fit&lt;-lm(MCAT_c~ GPA_c * Sex, data=MedGPA) 
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = MCAT_c ~ GPA_c * Sex, data = MedGPA)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -11.3726  -2.5536  -0.2759   2.6843   8.3184 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)  -0.1969     0.7902  -0.249   0.8043  
+## GPA_c         8.6614     3.2968   2.627   0.0113 *
+## SexM          0.4210     1.1266   0.374   0.7102  
+## GPA_c:SexM    0.7964     4.1276   0.193   0.8478  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 4.16 on 51 degrees of freedom
+## Multiple R-squared:  0.2956, Adjusted R-squared:  0.2542 
+## F-statistic: 7.135 on 3 and 51 DF,  p-value: 0.0004313</code></pre>
+<pre class="r"><code>#boostrap residuals 
+ resids&lt;-fit$residuals #save residuals
+ fitted&lt;-fit$fitted.values #save yhats
+ resid_resamp&lt;-replicate(5000,{
+ new_resids&lt;-sample(resids,replace=TRUE) #resample resids w/ replacement
+ MedGPA$new_y&lt;-fitted+new_resids #add new resids to yhats to get new &quot;data&quot;
+ fit1&lt;-lm(new_y~GPA_c+Sex,data=MedGPA) #refit model
+ coef(fit1) #save coefficient estimates (b0, b1, etc)
+})
+ resid_resamp%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)    GPA_c     SexM
+## 1   0.7447444 1.906459 1.085686</code></pre>
+<p><strong>Using boot strapped standard errors I was able to find that the p-values did not change. When looking at the standard errors when using boot strapped errors, i found that the standard error was less for both GPA and Sex than tha robust standard error and the original standard error. </strong></p>
+<p>##5. Logistical regression with binary variable</p>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+class_diag&lt;-function(probs,truth){
+  
+  tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord&lt;-order(probs, decreasing=TRUE)
+  probs &lt;- probs[ord]; truth &lt;- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+  TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+  
+  n &lt;- length(TPR)
+  auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+
+
+
+odds&lt;-function(p)p/(1-p)
+p&lt;-seq(0,1,by=.1)
+
+
+
+fit2&lt;- glm(Acceptance~MCAT + GPA + BCPM, data = MedGPA, family = binomial(link = &quot;logit&quot;))
+
+exp(coef(fit2))</code></pre>
+<pre><code>##  (Intercept)         MCAT          GPA         BCPM 
+## 1.624190e-10 1.177640e+00 1.616864e+02 6.995122e-01</code></pre>
+<pre class="r"><code>prob&lt;- predict(fit2, type = &quot;response&quot;)
+class_diag(prob, MedGPA$Acceptance)</code></pre>
+<pre><code>##         acc      sens spec       ppv       auc
+## 1 0.7454545 0.7666667 0.72 0.7666667 0.8373333</code></pre>
+<pre class="r"><code>table(predict = as.numeric(prob&gt;0.5), truth = MedGPA$Acceptance)%&gt;%addmargins</code></pre>
+<pre><code>##        truth
+## predict  0  1 Sum
+##     0   18  7  25
+##     1    7 23  30
+##     Sum 25 30  55</code></pre>
+<pre class="r"><code>##Sensitivity 
+23/30</code></pre>
+<pre><code>## [1] 0.7666667</code></pre>
+<pre class="r"><code>##Specificity
+18/25</code></pre>
+<pre><code>## [1] 0.72</code></pre>
+<pre class="r"><code>##Precision PPV
+23/30</code></pre>
+<pre><code>## [1] 0.7666667</code></pre>
+<pre class="r"><code>##Accuracy
+(18+53)/55</code></pre>
+<pre><code>## [1] 1.290909</code></pre>
+<pre class="r"><code>##Density Plot 
+logit&lt;-function(p)log(odds(p))
+cbind(p, odds=odds(p),logit=logit(p))%&gt;%round(4)</code></pre>
+<pre><code>##         p   odds   logit
+##  [1,] 0.0 0.0000    -Inf
+##  [2,] 0.1 0.1111 -2.1972
+##  [3,] 0.2 0.2500 -1.3863
+##  [4,] 0.3 0.4286 -0.8473
+##  [5,] 0.4 0.6667 -0.4055
+##  [6,] 0.5 1.0000  0.0000
+##  [7,] 0.6 1.5000  0.4055
+##  [8,] 0.7 2.3333  0.8473
+##  [9,] 0.8 4.0000  1.3863
+## [10,] 0.9 9.0000  2.1972
+## [11,] 1.0    Inf     Inf</code></pre>
+<pre class="r"><code>MedGPA$logit&lt;-predict(fit2) #get predicted log-odds
+MedGPA$outcome&lt;-factor(MedGPA$Acceptance,levels=c(&quot;Accepted&quot;,&quot;Denied&quot;))
+ggplot(MedGPA,aes(logit, fill=as.factor(Acceptance)))+geom_density(alpha=.3)+
+  geom_vline(xintercept=0,lty=2)</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>##ROC Curve
+sens&lt;- function(p, data = MedGPA, y = Acceptance) mean(MedGPA[MedGPA$Acceptance==1,]$prob&gt;p) 
+
+spec&lt;- function(p,data=MedGPA, y=Acceptance) mean(MedGPA[MedGPA$Acceptance==0,]$prob&lt;p)
+
+sensitivity&lt;- sapply(seq(0,1,.01), sens, MedGPA)
+specificity&lt;- sapply(seq(0,1,.01), spec, MedGPA)
+ROC1&lt;- data.frame(sensitivity, specificity, cutoff = seq(0,1,.01))
+ROC1$TPR&lt;- sensitivity
+ROC1$FPR&lt;- 1- specificity
+ROC1%&gt;%ggplot(aes(FPR, TPR))+geom_path(size = 1.5) + geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1), lty = 2) + scale_x_continuous(limits = c(0,1))</code></pre>
+<pre><code>## Warning: Removed 101 rows containing missing values (geom_path).</code></pre>
+<p><img src="/Project2_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<pre class="r"><code>library(plotROC)
+ROCplot&lt;-ggplot(MedGPA)+geom_roc(aes(d=Acceptance,m=prob), n.cuts=0) 
+
+##10 fold 
+set.seed(1234) 
+k = 5
+data1 &lt;- MedGPA[sample(nrow(MedGPA)), ]
+folds &lt;- cut(seq(1:nrow(MedGPA)), breaks = k, labels = F) 
+diags &lt;- NULL
+for (i in 1:k) {
+ train &lt;- data1[folds != i, ]
+ test &lt;- data1[folds == i, ]
+ truth &lt;- test$Acceptance
+ fit4 &lt;- lm(Acceptance~ MCAT+ GPA+ BCPM, data = train, family = &quot;binomial&quot;) 
+ probs &lt;- predict(fit4, newdata = test, type = &quot;response&quot;) 
+ preds &lt;- ifelse(probs &gt; 0.5, 1, 0)
+ diags &lt;- rbind(diags, class_diag(probs, truth)) 
+}</code></pre>
+<pre><code>## Warning: In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+##  extra argument &#39;family&#39; will be disregarded</code></pre>
+<pre><code>## Warning: In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+##  extra argument &#39;family&#39; will be disregarded
+
+## Warning: In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+##  extra argument &#39;family&#39; will be disregarded
+
+## Warning: In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+##  extra argument &#39;family&#39; will be disregarded
+
+## Warning: In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+##  extra argument &#39;family&#39; will be disregarded</code></pre>
+<pre class="r"><code>diags %&gt;% summarize_all(mean)</code></pre>
+<pre><code>##         acc     sens spec      ppv       auc
+## 1 0.6727273 0.767619 0.58 0.697619 0.7809524</code></pre>
+<pre class="r"><code>summary(fit4)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Acceptance ~ MCAT + GPA + BCPM, data = train, family = &quot;binomial&quot;)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.79414 -0.34790  0.05519  0.28287  0.79063 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -3.347610   0.910044  -3.679 0.000691 ***
+## MCAT         0.002212   0.015058   0.147 0.883931    
+## GPA          0.994495   0.753916   1.319 0.194635    
+## BCPM         0.083876   0.612936   0.137 0.891842    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.4144 on 40 degrees of freedom
+## Multiple R-squared:  0.3638, Adjusted R-squared:  0.3161 
+## F-statistic: 7.625 on 3 and 40 DF,  p-value: 0.0003805</code></pre>
+<p><strong>The coeeficient estimates show the effect of the differennt variables on the odds for Admission. For every one point increase in MCAT scores the odds of admission increases by 1.1776. For every one point increase in GPA, the odds of admission increases by 1.6168e^2. And finally for every one point increase in the BCPM, the odds of admission increases by 6.995e^-1. The accuracy from the model is calculated as 0.7454. Sensitivity is the true positive rate (TPR). It is the probability of correctly predicting acceptance for accepted students. I calculated sensitivity from the model as 0.7666. The Specifity is the true negative rate (TNR). I calculated the specificity from the model as 0.72 (18/25). The Precision (PPV) of the model is the proportion of the statistics that are predicted as accepted to those who actually are. It is 0.76. The auc calculated for the ROC curve was 0.8373. After performing a 5 fold CV i was able to find that the Sensitivity was alloted to 0.765 while the accuracy is at 0.672 and the recall is 0.6561905.</strong></p>
+<p>##6. Lasso Regression</p>
+<pre class="r"><code>library(glmnet)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loaded glmnet 3.0-1</code></pre>
+<pre class="r"><code>y&lt;- as.matrix(MedGPA$MCAT)
+##Predicting GPA 
+x&lt;-MedGPA%&gt;%dplyr::select(GPA, BCPM,Apps, VR, PS)%&gt;%mutate_all(scale)%&gt;%as.matrix    
+                          
+cv&lt;-cv.glmnet(x,y)
+lasso1&lt;- glmnet(x,y,lambda = cv$lambda.1se)
+coef(lasso1)</code></pre>
+<pre><code>## 6 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                     s0
+## (Intercept) 36.2727273
+## GPA          0.2516376
+## BCPM         .        
+## Apps         .        
+## VR           1.3210148
+## PS           2.2984928</code></pre>
+<pre class="r"><code>set.seed(1234)
+k=5 #choose number of folds
+data1&lt;-MedGPA[sample(nrow(MedGPA)),] #randomly order rows
+folds&lt;-cut(seq(1:nrow(MedGPA)),breaks=k,labels=F) #create folds
+diags&lt;-NULL
+for(i in 1:k){
+  train&lt;-data1[folds!=i,]
+  test&lt;-data1[folds==i,]
+  fit6&lt;-lm(MCAT~GPA+VR+PS,data=train)
+  yhat&lt;-predict(fit,newdata=test)
+  diags&lt;-mean((test$MCAT-yhat)^2)
+}
+mean(diags)</code></pre>
+<pre><code>## [1] 1309.608</code></pre>
+<pre class="r"><code>summary(fit6)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = MCAT ~ GPA + VR + PS, data = train)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -4.2075 -1.3507 -0.0867  0.9191  6.3902 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -6.4826     4.3002  -1.508  0.13953    
+## GPA           4.2355     1.3307   3.183  0.00282 ** 
+## VR            1.0741     0.1888   5.690 1.29e-06 ***
+## PS            1.7558     0.2151   8.163 4.76e-10 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 2.12 on 40 degrees of freedom
+## Multiple R-squared:  0.8409, Adjusted R-squared:  0.829 
+## F-statistic: 70.48 on 3 and 40 DF,  p-value: 5.104e-16</code></pre>
+<p><strong>I ran a lasso regression trying to predict MCAT scores from GPA, BCMP, Apps, VR, and PS variables. By running the lasso regression i was able to see that GPA, VR, and PS were retained meaning that they were the most important predictors of an MCAT score. The residual standard error of 2.233 is more than the standard from the 5 fold CV conducted in part 5 which has a value of 0.3915</strong></p>

@@ -1,0 +1,8 @@
+"0","library(ggplot2)"
+"0","library(tidyr)"
+"0","library(dplyr)"
+"0","library(tidyverse)"
+"0","District_wise_crimes_committed_IPC_2014<-read.csv(""DistrictCrimes.csv"")"
+"0","index_crimes_by_county_and_agency_beginning_1990<-read.csv(""index-crimes-by-county-and-agency-beginning-1990.csv"")"
+"0","india<-District_wise_crimes_committed_IPC_2014%>%pivot_wider(names_from=""States.UTs"", values_from= ""Year"")"
+"0","india%>%pivot_longer(c(90:125), names_to=""States/UTs"", values_to = ""Year"", values_drop_na = TRUE)"

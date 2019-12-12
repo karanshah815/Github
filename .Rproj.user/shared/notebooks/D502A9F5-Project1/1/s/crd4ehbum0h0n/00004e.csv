@@ -1,0 +1,2 @@
+"0","combined%>%group_by(County)%>%summarize(robberyvariance=var(Robbery,na.rm=T))"
+"2","Factor `County` contains implicit NA, consider using `forcats::fct_explicit_na`"

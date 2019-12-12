@@ -1,0 +1,102 @@
+---
+title: "Exploratory Data Project"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+Ny first data set is about the crime rates in the different states of India. This data set was interesting for me as my family is from India and I regulary go back and visit. It was interesting to see the different crime rates split up by different cirime types in different states of India. In order to analyze this data further I wanted to compare this data to that of another city. I used a data set that shows the crime rates of different counties in New York over a period of time to compare it to that of the states of India. The common variable between the data sets was the account of Robbery. 
+
+## 1. Tidying and Joining 
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+District_wise_crimes_committed_IPC_2014<-read.csv("DistrictCrimes.csv")
+index_crimes_by_county_and_agency_beginning_1990<-read.csv("index-crimes-by-county-and-agency-beginning-1990.csv")
+india<-District_wise_crimes_committed_IPC_2014%>%pivot_wider(names_from="States.UTs", values_from= "Year")
+india%>%pivot_longer(c(90:125), names_to="States/UTs", values_to = "Year", values_drop_na = TRUE)
+combined<-index_crimes_by_county_and_agency_beginning_1990%>%full_join(District_wise_crimes_committed_IPC_2014, by= "Robbery")
+```
+My data sets were tidy as is so I used the pivot_wider function in order to make them untidy. By using this function it made every state in the data set as a seperate coloumn making the whole dataset untidy. In order to re-tidy I used the pivot-longer which put the states back in one coloumn on seperate rows. I used full join in order to join both of my data sets bacause i wanted to keep the information contained in both data sets. I used the common variable of the rate of Robbery to join both of the data sets. 
+
+
+## 2. Wrangling 
+```{r}
+combined%>%filter(Agency=="Steuben County Sheriff")
+combined%>%arrange(desc(Robbery))
+combined%>%select(1:5)
+combined%>%mutate(average=Arson/Grievous.Hurt)
+combined%>%group_by(County)%>%summarize(meanrobbery=mean(Robbery, na.rm=T))
+combined%>%group_by(States.UTs)%>%summarize(meanrobber=mean(Robbery,na.rm=T))
+combined%>%group_by(States.UTs)%>%summarize(sdrobber=sd(Robbery,na.rm=T))
+combined%>%group_by(County)%>%summarize(sdrobber=sd(Robbery,na.rm=T))
+combined%>%group_by(County)%>%summarize(maxrobbery=max(Robbery,na.rm=T))
+combined%>%group_by(States.UTs)%>%summarize(maxrobbery=max(Robbery,na.rm=T))
+combined%>%group_by(County)%>%summarize(robberyvariance=var(Robbery,na.rm=T))
+combined%>%group_by(States.UTs)%>%summarize(robberyvariance=var(Robbery,na.rm=T))
+combined%>%group_by(States.UTs)%>%summarize(meanmurder=mean(Murder.y,na.rm=T))
+combined%>%group_by(County)%>%summarize(meanmurder=mean(Murder.x,na.rm=T))
+combined%>%group_by(Robbery)%>%na.omit()%>% summarize(meanlarceny=mean(Larceny), meanmurder=mean(Murder.x), meanrape=mean(Rape.x))%>%cor()
+
+```
+
+I first played around with the data using the 6 dplyr functions. I first used the filter function to look at the data for only the Steuben County Sheriff agency. I then used the slice function to show only the first 5 rows. The arrange function was used to arrange the locations from India and New york in descending order based on the number of robberies. The select function was used to show the first 5 coloumns of the combined data set. The mutate function was used to create a new variable that depicted the ratio of the number of accounts of Arson to the accounts of Grevious Hurt in India. I used the group_by function to compare States In India and their values for different Variables to Counties in New York and their specific values. The first summarize function was used to see the mean number of robberies in each county in New York. The second summarize function was to aslo find the mean number of robberies in each state in India. From there i was able to compare both tables to each other. I did the same procedure of comparing between counties in New York and states in India for different variables and computations. I found the standard deviation of robberies, max number of robberies, variance in robberies, and mean number of murders for both locations. I also found the correllation between the number of murders, rapes, and accounts of larceny in New York which showed that Murder and Robbery had the strongest correlation.  
+
+##3. Visualization
+```{r}
+
+library(ggplot2)
+#Relationship between accounts of Murder, Robbery, and Rape In New York 
+ggplot() + geom_point(data = combined, aes(x = Robbery, y = Murder.x, color =Rape.x))+ geom_line()+ ggtitle("Rate of Rape while comparing Rate of Robbery and Rate Of Murder in New York ")+ ylab("Accounts of Murder")+ xlab("Accounts of Robbery")
+
+#Relationship between accounts of Murder, Murder, and Rape In India
+ggplot()+geom_point(data=combined, aes(x= Robbery, y=Murder.y, color=Rape.y))+ geom_line()+ggtitle("Rate of Rape while comparing Rate of Robbery and Rate Of Murder in India") + scale_x_continuous(name= "Accounts of Robbery", limits= c(0,15000))
+
+#Number of Robberies in New York by the Years
+ggplot(combined, aes(x= Year.x, y= Robbery, fill= Year.x))+ geom_bar(stat="summary", fun.y="mean") + geom_errorbar(stat="summary") + ggtitle("Robbery Rates in New York by Year") + theme(legend.position= "none") + xlab("Year") + ylab("Rate of Robbery")
+
+
+```
+Graph Explanation
+The idea behind these graphs and the whole project was to analzye the accounts fo crime from two different locations. 
+Graph 1: The first graph plots the accounts of robbery, murder, and rape with each other. From the data you can see that when acconts of robberies and murder were low, so were the accounts of rape in New York. Furthermore there seemed to be a positive relationship between all three variables as they all increased following the increase of the other variable. For example, you can see that as accounts of robbery increased so did the accounts of murder and rape in New York showing a positive direct relationship between the variables. 
+
+Graph 2: The second graph is plotting the same variables but in India. By looking at the graph and comparing it to that of the graph for New York you can see that there are less acounts of Robbery in India during that given year. We can also see by looking at the graph that as the accounts of Robbery increase so do the accounts of Murder but the accounts of rape do not seem to be effected as much as the ones in New York. For the extreme points on the graph however, it does show a trend of increase in account of rape with an increase in murder and robbery.
+
+Graph 3: The third graph for just to keen my interest as i wanted to see how the accounts of Robbery had changed throughout the years in the counties of New York. The graph depicts a decline for the most part in the accounts of robbery which was very surprising. I was not expecting to see this amount of decline in the accounts of robbery as time went on. 
+
+##4. PCA
+```{r}
+combined1<- combined %>%select(Robbery, Murder.x, Rape.x, Motor.Vehicle.Theft,Rape.y, Murder.y, Attempt.to.commit.Murder)
+combinednumb<- combined1%>%select_if(is.numeric)%>%scale
+rownames(combinednumb)<- combined1$Murder.x
+comb_pca<-princomp(na.omit(combinednumb), cor= TRUE, scores= TRUE)
+names(comb_pca)
+summary(comb_pca, loadings= T)
+eigval<- comb_pca$sdev^2
+varprop= round(eigval/sum(eigval),2)
+ggplot()+geom_bar(aes(y=varprop,x=1:7),stat="identity")+xlab("")+geom_path(aes(y=varprop,x=1:7))+
+  geom_text(aes(x=1:7,y=varprop,label=round(varprop,2)),vjust=1,col="white",size=5)+
+  scale_y_continuous(breaks=seq(0,.6,.2),labels = scales::percent)+
+  scale_x_continuous(breaks=1:10)
+round(cumsum(eigval)/sum(eigval),2)
+eigval
+summary(comb_pca, loading=T)
+comb_pca$loadings[1:7,1:2]%>%as.data.frame%>%rownames_to_column%>%
+  ggplot()+geom_hline(aes(yintercept=0),lty=2)+
+  geom_vline(aes(xintercept=0),lty=2)+ylab("PC2")+xlab("PC1")+
+  geom_segment(aes(x=0,y=0,xend=Comp.1,yend=Comp.2),arrow=arrow(),col="red")+
+  geom_label(aes(x=Comp.1*1.1,y=Comp.2*1.1,label=rowname))
+ggplot()+geom_point(aes(comb_pca$scores[,1], comb_pca$scores[,2]))+xlab("PC1") + ylab("PC2")+ xlim(c(-250,10))
+
+```
+Based on the spacing of the arrows in the graph we can interpret the strongest correlations between variables. From the graph we can see that Rape and Murder in New York are strongly correlated while Rape and Murder in India are not as strongly correlated. 
+The second graph is depicting the association between PC1 and PC2. From the graph we can see that there does not seem to be a distinct relationship between PC1 PC2. As PC1 increases PC2 looks to be both increasing and decreasing. 
