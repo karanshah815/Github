@@ -13,21 +13,18 @@ theme = "hugo-sustain"
 [params]
   avatar = "profilephoto.JPG"
   author = "Karan Shah"
-  description = "Describe your website"
+  description = "This is my website"
 
   # Custom assets can be linked with their paths relative to static/
   custom_css = []
   custom_js  = []
 
 [params.social]
-  Github        = "username"
-  Email         = "karanshah815@gmail.com"
-  Twitter       = "username"
-  LinkedIn      = "username"
-  Stackoverflow = "username"
-  Medium        = "username"
-  Telegram      = "username"
 
+  Email         = "karanshah815@gmail.com"
+  Twitter       = "karanshah815"
+
+ 
 ## Main Menu
 [[menu.main]]
   name = "blog"
