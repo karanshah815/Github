@@ -1,10 +1,10 @@
 /* Main page with stikky-footer */
 html, body {
   height: 100%;
-  background-color: #fff;
-  font-family: 'Source Sans Pro', sans-serif;
+  background-color: #ffffff;
+  font-family: 'Anton', sans-serif;
   /* The html and body elements cannot have any padding or margin. */
-  border-top: 3px solid #27A822;
+  border-top: 8px solid #d97204;
 }
 
 /* Wrapper for page content to push down footer */
@@ -23,23 +23,23 @@ html, body {
   margin-bottom: 10px;
 }
 .navbar-default {
-  background-color: #ffffff;
+  background-color: #d97204;
   border-color: #ffffff;
 }
 .navbar-default .navbar-brand {
-  color: #6b6b6b;
+  color: #d97204;
 }
 .navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus {
-  color: #6b6b6b;
+  color: #d97204;
 }
 .navbar-default .navbar-text {
-  color: #6b6b6b;
+  color: #fcfbfa;
 }
 .navbar-default .navbar-nav > li > a {
-  color: #6b6b6b;
+  color: #fcfbfa;
 }
 .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
-  color: #6b6b6b;
+  color: #fcfbfa;
 }
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
   color: #6b6b6b;
@@ -91,10 +91,10 @@ html, body {
   margin: 20px 0;
 }
 .container a {
-  color: #27A822;
+  color: #d97204;
 }
 .container a:hover {
-  color: #267723;
+  color: #fcfbfa;
 }
 .container p img, .img-responsive {
   display: block;
@@ -116,10 +116,10 @@ html, body {
   font-size: 15px;
 }
 .panel-default h4 a, h5 a {
-  color: #27A822;
+  color: #d97204;
 }
 .panel-default h4 a:hover, h5 a:hover {
-  color: #267723;
+  color: #d97204;
 }
 .panel{
   border-style: none;

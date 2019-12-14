@@ -7,3 +7,30 @@ categories: []
 tags: []
 description: ''
 ---
+
+![](/blog/2019-12-11-blog-post_files/Python.jpeg)
+I really enjoyed learning how to use Python this semester in class. Having a background in java and R I really wanted to be exposed to Python as I have heard that it is very popular withing the computer science community. 
+
+The following are examples of how i learned to use Python in class: 
+
+```{r}
+
+```
+```{python}
+list1= [1,2,3,4]
+list1[2]
+list1[0]
+list1[1:]
+
+```
+
+Using python we can have a vector and look through it and select certain positions that we want. List1[2] returns the third position in the vector while list1[0] return the first position. list1[1:] lists everything from the second position and onward. 
+
+
+Python also has certain functions that we can use to manipulate our list
+```{python}
+list2 = [2,4,6]
+list2.insert(3,8)
+list2
+```
+By using the list function we were able to add the value 8 at the fourth position in the vector.
