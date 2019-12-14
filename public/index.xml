@@ -17,8 +17,7 @@
       <pubDate>Wed, 11 Dec 2019 00:00:00 +0000</pubDate>
       
       <guid>/blog/blog-post/</guid>
-      <description>I really enjoyed learning how to use Python this semester in class. Having a background in java and R I really wanted to be exposed to Python as I have heard that it is very popular withing the computer science community.
-The following are examples of how i learned to use Python in class:
+      <description>I really enjoyed learning how to use Python this semester in class. Having a background in java and R, I really wanted to be exposed to Python as another coding language. The following are examples of how i learned to use Python in class:
 list1= [1,2,3,4] list1[2] ## 3 list1[0] ## 1 list1[1:] ## [2, 3, 4] Using python we can have a vector and look through it and select certain positions that we want.</description>
     </item>
     

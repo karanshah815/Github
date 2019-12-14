@@ -9,8 +9,7 @@ description: ''
 ---
 
 ![](/blog/2019-12-11-blog-post_files/Python.jpeg)
-I really enjoyed learning how to use Python this semester in class. Having a background in java and R I really wanted to be exposed to Python as I have heard that it is very popular withing the computer science community. 
-
+I really enjoyed learning how to use Python this semester in class. Having a background in java and R, I really wanted to be exposed to Python as another coding language.
 The following are examples of how i learned to use Python in class: 
 
 ```{r}
@@ -34,3 +33,14 @@ list2.insert(3,8)
 list2
 ```
 By using the list function we were able to add the value 8 at the fourth position in the vector.
+
+
+Furthermore python allows us to compute mathematical analysis using function that are within numpy.
+```{python}
+import numpy as np
+
+list3 = [1,8,9,10,11,16,13,77,68,18]
+print("mean of list 3: ", np.mean(list3))
+
+```
+The mean function allows us to find the mean of the vector. By using print, we can also return the value of the mean after using a string. In this case I explained what the value being returned was as a string. 

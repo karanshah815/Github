@@ -11,8 +11,8 @@ description: ''
 
 
 <p><img src="/blog/2019-12-11-blog-post_files/Python.jpeg" />
-I really enjoyed learning how to use Python this semester in class. Having a background in java and R I really wanted to be exposed to Python as I have heard that it is very popular withing the computer science community.</p>
-<p>The following are examples of how i learned to use Python in class:</p>
+I really enjoyed learning how to use Python this semester in class. Having a background in java and R, I really wanted to be exposed to Python as another coding language.
+The following are examples of how i learned to use Python in class:</p>
 <pre class="python"><code>list1= [1,2,3,4]
 list1[2]</code></pre>
 <pre><code>## 3</code></pre>
@@ -27,3 +27,10 @@ list2.insert(3,8)
 list2</code></pre>
 <pre><code>## [2, 4, 6, 8]</code></pre>
 <p>By using the list function we were able to add the value 8 at the fourth position in the vector.</p>
+<p>Furthermore python allows us to compute mathematical analysis using function that are within numpy.</p>
+<pre class="python"><code>import numpy as np
+
+list3 = [1,8,9,10,11,16,13,77,68,18]
+print(&quot;mean of list 3: &quot;, np.mean(list3))</code></pre>
+<pre><code>## (&#39;mean of list 3: &#39;, 23.100000000000001)</code></pre>
+<p>The mean function allows us to find the mean of the vector. By using print, we can also return the value of the mean after using a string. In this case I explained what the value being returned was as a string.</p>
